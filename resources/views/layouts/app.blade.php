@@ -191,15 +191,6 @@
         </ul>
     </div>
 
-    <!-- Logout al fondo -->
-    <div class="p-3 border-top border-secondary">
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
-                <i class="bi bi-box-arrow-left me-1"></i>Cerrar sesión
-            </button>
-        </form>
-    </div>
 </nav>
 
 <!-- Contenido principal -->
@@ -210,6 +201,12 @@
         <div class="d-flex align-items-center gap-2">
             <span class="badge bg-primary">{{ $rol }}</span>
             <span class="text-muted small">{{ auth()->user()->correo_institucional }}</span>
+            <form method="POST" action="{{ route('logout') }}" class="mb-0">
+                @csrf
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-box-arrow-left me-1"></i>Cerrar sesión
+                </button>
+            </form>
         </div>
     </div>
 
