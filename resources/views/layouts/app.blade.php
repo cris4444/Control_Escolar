@@ -51,6 +51,13 @@
             letter-spacing: .08em;
             padding: .75rem 1rem .25rem;
         }
+        .sidebar {
+            height: 100vh;   
+            position: fixed;
+            top: 0; left: 0;
+            overflow-y: auto;
+            
+        }
     </style>
     @stack('estilos')
 </head>

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Rol;
 use App\Models\Usuario;
 
-class DatosInicialesSeeder extends Seeder
+class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
