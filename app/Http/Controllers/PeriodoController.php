@@ -9,7 +9,22 @@ class PeriodoController extends Controller
 {
     public function index()
     {
-        $periodos = Periodo::orderByDesc('fecha_inicio')->get();
+        $hoy = now()->toDateString();
+
+        $periodos = Periodo::withCount('grupos')
+            ->orderByDesc('fecha_inicio')
+            ->get()
+            ->map(function ($periodo) use ($hoy) {
+                if ($hoy < $periodo->fecha_inicio) {
+                    $periodo->estado_calculado = 'proximo';
+                } elseif ($hoy > $periodo->fecha_fin) {
+                    $periodo->estado_calculado = 'cerrado';
+                } else {
+                    $periodo->estado_calculado = 'activo';
+                }
+                return $periodo;
+            });
+
         return view('periodos.index', compact('periodos'));
     }
 

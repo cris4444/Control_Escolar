@@ -3,14 +3,38 @@
 namespace App\Http\Controllers;
 
 use App\Models\Aula;
+use App\Models\Periodo;
 use Illuminate\Http\Request;
 
 class AulaController extends Controller
 {
     public function index()
     {
-        $aulas = Aula::all();
-        return view('aulas.index', compact('aulas'));
+        $hoy = now()->toDateString();
+
+        // Periodo vigente según la fecha de hoy (puede no existir si no hay uno activo)
+        $periodoActual = Periodo::where('fecha_inicio', '<=', $hoy)
+            ->where('fecha_fin', '>=', $hoy)
+            ->first();
+
+        // Cargamos solo los grupos del periodo actual, con el total de alumnos inscritos en cada uno
+        $aulas = Aula::with(['grupos' => function ($query) use ($periodoActual) {
+                $query->when($periodoActual, fn ($q) => $q->where('periodo_id', $periodoActual->id))
+                    ->withCount('kardexInscripciones');
+            }])
+            ->orderBy('edificio')
+            ->orderBy('numero_identificador')
+            ->get()
+            ->map(function ($aula) {
+                $aula->inscritos_actuales = $aula->grupos->sum('kardex_inscripciones_count');
+                $aula->grupos_actuales = $aula->grupos->count();
+                $aula->porcentaje_ocupacion = $aula->capacidad_maxima > 0
+                    ? min(100, round(($aula->inscritos_actuales / $aula->capacidad_maxima) * 100))
+                    : 0;
+                return $aula;
+            });
+
+        return view('aulas.index', compact('aulas', 'periodoActual'));
     }
 
     public function create()
