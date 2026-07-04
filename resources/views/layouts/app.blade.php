@@ -65,11 +65,9 @@
 
 <!-- Sidebar -->
 <nav class="sidebar d-flex flex-column">
-    <div class="sidebar-header">
-        <h5 class="text-white mb-0 fw-bold">
-            <i class="bi bi-mortarboard-fill me-2"></i>SAES
-        </h5>
-        <small class="text-secondary">Sistema Escolar</small>
+    <div class="sidebar-header text-center">
+        <img src="{{ asset('images/univac-logo.jpeg') }}" alt="UNIVAC" class="img-fluid mb-1" style="max-width: 160px; filter: brightness(0) invert(1);">
+        <div><small class="text-secondary">Sistema Escolar</small></div>
     </div>
 
     <div class="flex-grow-1 py-2">

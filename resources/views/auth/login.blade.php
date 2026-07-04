@@ -27,9 +27,8 @@
     <div class="card login-card">
         <div class="card-body p-5">
             <div class="text-center mb-4">
-                <i class="bi bi-mortarboard-fill text-primary" style="font-size: 3rem;"></i>
-                <h4 class="fw-bold mt-2 mb-0">SAES</h4>
-                <p class="text-muted small">Sistema de Administración Escolar</p>
+                <img src="{{ asset('images/univac-logo.jpeg') }}" alt="UNIVAC" class="img-fluid mb-2" style="max-width: 220px;">
+                <p class="text-muted small mb-0">Sistema de Administración Escolar</p>
             </div>
 
             @if($errors->any())
