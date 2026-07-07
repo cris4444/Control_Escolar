@@ -7,11 +7,17 @@ use Illuminate\Http\Request;
 
 class RolController extends Controller
 {
-    public function index()
-    {
-        $roles = Rol::all();
-        return view('roles.index', compact('roles'));
-    }
+public function index(Request $request)
+{
+    $roles = Rol::query()
+        ->when($request->filled('buscar'), function ($query) use ($request) {
+            $query->where('nombre', 'like', '%' . $request->buscar . '%');
+        })
+        ->orderBy('nombre')
+        ->get();
+
+    return view('roles.index', compact('roles'));
+}
 
     public function create()
     {
