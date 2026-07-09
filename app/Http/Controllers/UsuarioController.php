@@ -9,11 +9,22 @@ use Illuminate\Support\Facades\Hash;
 
 class UsuarioController extends Controller
 {
-    public function index()
-    {
-        $usuarios = Usuario::with('rol')->get();
-        return view('usuarios.index', compact('usuarios'));
-    }
+public function index(Request $request)
+{
+    $usuarios = Usuario::with('rol')
+        ->when($request->filled('rol_id'), function ($query) use ($request) {
+            $query->where('rol_id', $request->rol_id);
+        })
+        ->when($request->filled('buscar'), function ($query) use ($request) {
+            $query->where('correo_institucional', 'like', '%' . $request->buscar . '%');
+        })
+        ->orderBy('correo_institucional')
+        ->get();
+
+    $roles = Rol::all();
+
+    return view('usuarios.index', compact('usuarios', 'roles'));
+}
 
     public function create()
     {

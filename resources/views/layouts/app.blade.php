@@ -10,7 +10,7 @@
     <style>
         body { background-color: #f4f6f9; }
         .sidebar {
-            min-height: 100vh;
+            height: 100vh;
             background-color: #1a2b4a;
             width: 250px;
             position: fixed;
@@ -66,7 +66,7 @@
 <!-- Sidebar -->
 <nav class="sidebar d-flex flex-column">
     <div class="sidebar-header text-center">
-        <img src="{{ asset('images/univac-logo.jpeg') }}" alt="UNIVAC" class="img-fluid mb-1" style="max-width: 160px; filter: brightness(0) invert(1);">
+        <img src="{{ asset('images/univac-logo.jpeg') }}" alt="UNIVAC" class="img-fluid mb-1 rounded-2" style="max-width: 180px; max-height: 140px; object-fit: contain; background-color: #fff;padding: 4px;">
         <div><small class="text-secondary">Sistema Escolar</small></div>
     </div>
 

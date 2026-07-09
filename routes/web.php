@@ -73,20 +73,27 @@ Route::middleware(['auth'])->group(function () {
         // Grupos
         Route::resource('grupos', GrupoController::class);
 
-        // Inscripciones / Kardex (gestión administrativa)
-        Route::resource('kardex', KardexInscripcionController::class)
-            ->parameters(['kardex' => 'kardex']);
+        // Kardex: acciones exclusivas de gestión (crear y eliminar)
+        Route::get('/kardex/create', [KardexInscripcionController::class, 'create'])->name('kardex.create');
+        Route::post('/kardex', [KardexInscripcionController::class, 'store'])->name('kardex.store');
+        Route::delete('/kardex/{kardex}', [KardexInscripcionController::class, 'destroy'])->name('kardex.destroy');
     });
 
     // ==========================================
-    // Docente: gestión de calificaciones y asistencia
+    // Kardex: lectura y edición (Admin |rativo y Docente)
     // ==========================================
-    Route::middleware(['rol:Docente'])->group(function () {
+    Route::middleware(['rol:Admin,Personal Administrativo,Docente'])->group(function () {
 
-        // Solo puede actualizar calificaciones, no crear/eliminar inscripciones
         Route::get('/kardex', [KardexInscripcionController::class, 'index'])->name('kardex.index');
+        Route::get('/kardex/{kardex}', [KardexInscripcionController::class, 'show'])->name('kardex.show');
         Route::get('/kardex/{kardex}/edit', [KardexInscripcionController::class, 'edit'])->name('kardex.edit');
         Route::put('/kardex/{kardex}', [KardexInscripcionController::class, 'update'])->name('kardex.update');
+    });
+
+    // ==========================================
+    // Docente: gestión de asistencia
+    // ==========================================
+    Route::middleware(['rol:Docente'])->group(function () {
 
         // Gestión completa de asistencias de sus grupos
         Route::resource('asistencias', AsistenciaController::class)->except(['show']);

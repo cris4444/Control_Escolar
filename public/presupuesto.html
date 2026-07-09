@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Presupuesto TI - Exportable</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { background-color: #f8f9fa; color: #333; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .table th { background-color: #f1f3f5; }
+        .no-print { display: block; }
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div id="presupuesto-contenedor" class="p-5 bg-white rounded shadow">
+            <div class="row">
+                <div class="col-12 border-bottom pb-3 mb-4 d-flex align-items-center gap-3">
+                    <div style="height: 100px; width: 180px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        <img src="images/Technovac-logo.jpeg" alt="Tecnovac Logo" style="width: 100%; transform: scale(1.2); transform-origin: center center;">
+                    </div>
+                    <div>
+                        <h2 class="text-primary fw-bold m-0">Technovac • Hoja presupuestal</h2>
+                        <small class="text-muted">Formato de Estimación de Costos de Infraestructura y Desarrollo</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 id-controles no-print">
+                    <div class="card p-4 bg-light h-100">
+                        <h5 class="card-title fw-bold mb-3 text-secondary">Ajuste de Variables</h5>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tarifa por Hora (MXN):</label>
+                            <input type="number" id="tarifa" class="form-control form-control-lg" value="300" oninput="calcularFinanzas()">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Horas Totales Estimadas:</label>
+                            <input type="number" id="horas" class="form-control form-control-lg" value="240" oninput="calcularFinanzas()">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Costo Mensual de Nube (MXN):</label>
+                            <input type="number" id="nube" class="form-control form-control-lg" value="1200" oninput="calcularFinanzas()">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Margen de Contingencia (%):</label>
+                            <input type="number" id="contingencia" class="form-control form-control-lg" value="15" oninput="calcularFinanzas()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 id-tabla-resultados">
+                    <div class="card p-4 border border-2 border-primary h-100">
+                        <h5 class="card-title fw-bold mb-3 text-primary">Resumen del Costo Total</h5>
+                        <table class="table table-hover align-middle m-0">
+                            <tbody>
+                                <tr>
+                                    <th class="w-60">Costo de Desarrollo (CAPEX):</th>
+                                    <td class="text-end">$<span id="res-desarrollo">0.00</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Infraestructura Anual (OPEX):</th>
+                                    <td class="text-end">$<span id="res-nube">0.00</span></td>
+                                </tr>
+                                <tr class="table-light">
+                                    <th class="fw-bold">Subtotal:</th>
+                                    <td class="text-end fw-bold">$<span id="res-subtotal">0.00</span></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-danger">Reserva de Riesgo / Contingencia:</th>
+                                    <td class="text-end text-danger">$<span id="res-contingencia-monto">0.00</span></td>
+                                </tr>
+                                <tr class="table-primary fs-5">
+                                    <th class="fw-bold text-primary">Presupuesto Total:</th>
+                                    <td class="text-end fw-bold text-primary">$<span id="res-total">0.00</span> MXN</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <div class="card p-4 border">
+                        <h5 class="card-title fw-bold mb-3 text-secondary">Descripción y Alcance del Proyecto</h5>
+
+                        <div class="mb-3 no-print">
+                            <label class="form-label text-muted">Añade aquí las aclaraciones técnicas del servicio o desglose de módulos:</label>
+                            <textarea id="texto-conceptos" class="form-control" rows="5" oninput="actualizarVistaImpresion()" placeholder="Escribe aquí las especificaciones del desarrollo, por ejemplo:&#10;- Módulo de Punto de Venta (EmmaChanSystem)&#10;- Despliegue seguro en servidores Linux mediante IPFire&#10;- Base de datos relacional optimizada con respaldos mensuales..."></textarea>
+                        </div>
+
+                        <div id="vista-impresion-conceptos" class="p-3 bg-light rounded text-secondary" style="white-space: pre-wrap; min-height: 100px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4 no-print">
+            <button class="btn btn-success btn-lg px-5 shadow" onclick="generarReportePDF()">Generar Documento PDF</button>
+        </div>
+    </div>
+
+    <script>
+        function calcularFinanzas() {
+            const tarifa = parseFloat(document.getElementById('tarifa').value) || 0;
+            const horas = parseFloat(document.getElementById('horas').value) || 0;
+            const nubeMensual = parseFloat(document.getElementById('nube').value) || 0;
+            const pctContingencia = parseFloat(document.getElementById('contingencia').value) || 0;
+
+            const costoDesarrollo = tarifa * horas;
+            const costoNubeAnual = nubeMensual * 12;
+            const subtotal = costoDesarrollo + costoNubeAnual;
+            const montoContingencia = subtotal * (pctContingencia / 100);
+            const total = subtotal + montoContingencia;
+
+            document.getElementById('res-desarrollo').innerText = costoDesarrollo.toLocaleString('es-MX', {minimumFractionDigits: 2});
+            document.getElementById('res-nube').innerText = costoNubeAnual.toLocaleString('es-MX', {minimumFractionDigits: 2});
+            document.getElementById('res-subtotal').innerText = subtotal.toLocaleString('es-MX', {minimumFractionDigits: 2});
+            document.getElementById('res-contingencia-monto').innerText = montoContingencia.toLocaleString('es-MX', {minimumFractionDigits: 2});
+            document.getElementById('res-total').innerText = total.toLocaleString('es-MX', {minimumFractionDigits: 2});
+        }
+
+        function actualizarVistaImpresion() {
+            const textoOriginal = document.getElementById('texto-conceptos').value;
+            document.getElementById('vista-impresion-conceptos').innerText = textoOriginal;
+        }
+
+        function generarReportePDF() {
+            // Sincronizar descripción antes de capturar
+            actualizarVistaImpresion();
+
+            const elementoAImprimir = document.getElementById('presupuesto-contenedor');
+
+            // Ocultar controles completamente (sin dejar espacio en blanco)
+            const controles = document.querySelectorAll('.no-print');
+            controles.forEach(el => el.style.display = 'none');
+
+            // Expandir tabla de resultados a ancho completo
+            const tablaResultados = document.querySelector('.id-tabla-resultados');
+            tablaResultados.classList.remove('col-md-6');
+            tablaResultados.classList.add('col-12');
+
+            const configuracion = {
+                margin:       0.4,
+                filename:     'Propuesta_Presupuesto_TI.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(configuracion).from(elementoAImprimir).save().then(() => {
+                // Restaurar estado original
+                controles.forEach(el => el.style.display = '');
+                tablaResultados.classList.remove('col-12');
+                tablaResultados.classList.add('col-md-6');
+            });
+        }
+
+        window.onload = function() {
+            calcularFinanzas();
+            actualizarVistaImpresion();
+        };
+    </script>
+</body>
+</html>
