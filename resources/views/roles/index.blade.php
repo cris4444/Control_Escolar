@@ -9,19 +9,6 @@
         </a>
     </div>
 
-    @if (session('exito'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('exito') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
     {{-- Zona de filtros --}}
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-body">
@@ -79,10 +66,10 @@
                                 <a href="{{ route('roles.edit', $rol) }}" class="btn btn-sm btn-outline-secondary me-1">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form action="{{ route('roles.destroy', $rol) }}" method="POST" class="d-inline"
-                                    onsubmit="return confirm('¿Eliminar este rol?')">
+                                <form action="{{ route('roles.destroy', $rol) }}" method="POST"
+                                    class="d-inline form-eliminar-rol" data-nombre="{{ $rol->nombre }}">
                                     @csrf @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger">
+                                    <button type="button" class="btn btn-sm btn-outline-danger">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
@@ -99,3 +86,26 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.querySelectorAll('.form-eliminar-rol').forEach(form => {
+            const boton = form.querySelector('button');
+            boton.addEventListener('click', function() {
+                const nombre = form.dataset.nombre;
+                Swal.fire({
+                    title: '¿Eliminar rol?',
+                    text: `Se eliminará el rol "${nombre}".`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#dc2626',
+                }).then((result) => {
+                    if (result.isConfirmed) form.submit();
+                });
+            });
+        });
+    </script>
+@endpush
