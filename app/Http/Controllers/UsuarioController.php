@@ -27,10 +27,10 @@ public function index(Request $request)
 }
 
     public function create()
-    {
-        $roles = Rol::all();
-        return view('usuarios.create', compact('roles'));
-    }
+{
+    $roles = Rol::where('activo', true)->get();
+    return view('usuarios.create', compact('roles'));
+}
 
     public function store(Request $request)
     {
@@ -49,11 +49,14 @@ public function index(Request $request)
         return redirect()->route('usuarios.index')->with('exito', 'Usuario creado correctamente.');
     }
 
-    public function edit(Usuario $usuario)
-    {
-        $roles = Rol::all();
-        return view('usuarios.edit', compact('usuario', 'roles'));
-    }
+public function edit(Usuario $usuario)
+{
+    $roles = Rol::where('activo', true)
+        ->orWhere('id', $usuario->rol_id)
+        ->get();
+
+    return view('usuarios.edit', compact('usuario', 'roles'));
+}
 
     public function update(Request $request, Usuario $usuario)
     {

@@ -64,4 +64,16 @@ class Usuario extends Authenticatable
     {
         return $this->hasMany(BitacoraAuditoria::class, 'usuario_id');
     }
+
+    // NUEVO: helper para checar permisos directamente desde el usuario logueado
+    public function tienePermiso(string $clave): bool
+    {
+        return $this->rol?->tienePermiso($clave) ?? false;
+    }
+
+    // NUEVO: helper rápido para checar el nombre del rol
+    public function esRol(string $nombreRol): bool
+    {
+        return $this->rol?->nombre === $nombreRol;
+    }
 }

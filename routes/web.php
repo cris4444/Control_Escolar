@@ -42,7 +42,8 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['rol:Admin'])->group(function () {
 
         // Roles
-        Route::resource('roles', RolController::class)->except(['show']);
+        // Roles
+Route::resource('roles', RolController::class)->except(['show'])->parameters(['roles' => 'rol']);
 
         // Usuarios
         Route::resource('usuarios', UsuarioController::class)->except(['show']);
