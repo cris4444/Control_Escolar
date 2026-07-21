@@ -44,6 +44,15 @@
                     </label>
                 </div>
 
+                @if ($modulosAplicables === null)
+                    <div class="alert alert-warning small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Este rol no está asignado a ningún grupo de rutas todavía. Se muestran todos los permisos,
+                        pero ninguno tendrá efecto hasta que agregues <code>{{ $rol->nombre }}</code> al middleware
+                        <code>rol:</code> correspondiente en <code>routes/web.php</code>.
+                    </div>
+                @endif
+
                 <label class="form-label fw-semibold">Permisos</label>
                 <div class="row mb-3">
                     @forelse ($permisosPorModulo as $modulo => $permisos)
@@ -67,9 +76,22 @@
                             </div>
                         </div>
                     @empty
-                        <div class="col-12 text-muted small">No hay permisos registrados todavía.</div>
+                        <div class="col-12 text-muted small">Este rol no tiene módulos con permisos aplicables.</div>
                     @endforelse
                 </div>
+
+                @if ($permisosSinEfecto->isNotEmpty())
+                    <details class="mb-3">
+                        <summary class="text-muted small" style="cursor:pointer">
+                            Ver módulos sin efecto para este rol ({{ $permisosSinEfecto->count() }})
+                        </summary>
+                        <div class="alert alert-secondary small mt-2 mb-0">
+                            Este rol no tiene acceso de ruta a:
+                            <strong>{{ $permisosSinEfecto->keys()->implode(', ') }}</strong>.
+                            Marcar permisos ahí no tendría ningún efecto mientras no se agregue este rol a esas rutas.
+                        </div>
+                    </details>
+                @endif
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">

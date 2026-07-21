@@ -11,7 +11,14 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-            <form method="POST" action="{{ route('roles.store') }}">
+            <div class="alert alert-warning small">
+                <i class="bi bi-info-circle me-1"></i>
+                Un rol nuevo no tiene acceso a ninguna sección hasta que un desarrollador agregue su nombre
+                al middleware <code>rol:</code> correspondiente en <code>routes/web.php</code>. Los permisos que
+                marques aquí solo tendrán efecto después de ese paso.
+            </div>
+
+            <form action="{{ route('roles.store') }}" method="POST">
                 @csrf
 
                 <div class="row">

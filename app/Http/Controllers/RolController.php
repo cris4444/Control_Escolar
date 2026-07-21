@@ -8,6 +8,16 @@ use Illuminate\Http\Request;
 
 class RolController extends Controller
 {
+    // Módulos de permisos que realmente tienen efecto para cada rol,
+    // según a qué grupos de rutas (middleware rol:) pertenece cada uno.
+    // Si agregas un rol nuevo a un grupo de rutas en web.php, agrégalo aquí también.
+    private array $modulosPorRol = [
+        'Admin' => ['usuarios', 'roles', 'bitacora', 'aulas', 'periodos', 'carreras', 'materias', 'alumnos', 'docentes', 'grupos', 'kardex', 'asistencias'],
+        'Personal Administrativo' => ['materias', 'alumnos', 'docentes', 'grupos', 'kardex'],
+        'Docente' => ['kardex', 'asistencias'],
+        'Alumno' => [], // sus rutas (mi-kardex, mis-asistencias) no usan permiso: todavía
+    ];
+
     public function index(Request $request)
     {
         $roles = Rol::query()
@@ -50,10 +60,23 @@ class RolController extends Controller
 
     public function edit(Rol $rol)
     {
-        $permisosPorModulo = Permiso::orderBy('clave')->get()->groupBy('modulo');
+        $todosLosPermisos = collect(Permiso::orderBy('clave')->get()->groupBy('modulo'));
+
+        // Filtra solo los módulos que realmente aplican a este rol según las rutas
+        $modulosAplicables = $this->modulosPorRol[$rol->nombre] ?? null;
+
+        if ($modulosAplicables !== null) {
+            $permisosPorModulo = $todosLosPermisos->only($modulosAplicables);
+            $permisosSinEfecto = $todosLosPermisos->except($modulosAplicables);
+        } else {
+            // Rol nuevo/custom que no está en ningún grupo de rutas todavía
+            $permisosPorModulo = $todosLosPermisos;
+            $permisosSinEfecto = collect();
+        }
+
         $permisosAsignados = $rol->permisos()->pluck('Permisos.id')->toArray();
 
-        return view('roles.edit', compact('rol', 'permisosPorModulo', 'permisosAsignados'));
+        return view('roles.edit', compact('rol', 'permisosPorModulo', 'permisosAsignados', 'permisosSinEfecto', 'modulosAplicables'));
     }
 
     public function update(Request $request, Rol $rol)
